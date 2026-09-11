@@ -117,6 +117,33 @@ PROPOSED → AUTHORIZED → EXECUTING → VERIFIED      (الدليل كامل �
 
 ---
 
+---
+
+## المرحلة 0: التثبيت (Hardening) — الحالة: مكتملة جزئيًا ✓
+
+الهدف: **نظام أكثر قوة وقابلية للتشغيل** — بدون ذكاء جديد، فقط جاهزية تشغيل حقيقية.
+
+| البند | الملف | الحالة |
+|---|---|---|
+| تصنيف أخطاء موحّد بأكواد ثابتة | `core/errors.py` | ✓ |
+| إعدادات من ملف JSON/TOML + متغيرات بيئة `AGI_*` | `core/config.py` | ✓ |
+| ساعة قابلة للحقن (اختبارات حتمية) | `core/clock.py` | ✓ |
+| تسجيل structured (نص/JSON) | `core/logging_setup.py` | ✓ |
+| مقاييس (counters/gauges/durations) + `metrics.json` | `core/metrics.py` | ✓ |
+| كتابة ذرية للملفات (temp + `os.replace` + `fsync`) | `core/executor.py` | ✓ |
+| مهلة لكل إجراء + مهلة لكل تشغيل | `core/kernel.py` | ✓ |
+| إعادة محاولات محدودة Budget (معطّلة افتراضيًا) | `core/kernel.py` | ✓ |
+| حصة ملفات (quota) داخل الصندوق الرملي | `core/executor.py` | ✓ |
+| إيقاف تعاوني (`request_stop`) وحالة `ABORTED` | `core/kernel.py` | ✓ |
+| `fsck` / `quarantine` / `snapshot` / `rotate` للسجل | `core/event_ledger.py` | ✓ |
+| إصدار مخطط الأحداث (`schema_version`) | `core/config.py` | ✓ |
+| فحص صحة شامل `Kernel.health()` | `core/kernel.py` | ✓ |
+| واجهة سطر أوامر (`agi-kernel`) | `core/cli.py` | ⏳ قيد التنفيذ |
+| حزمة قابلة للتثبيت + CI | `pyproject.toml`, `.github/` | ⏳ قيد التنفيذ |
+
+> ملاحظة معمارية: المنفذ **لا** يبتلع `KeyboardInterrupt`/`SystemExit` — فهي تعود للعملية،
+> ويبقى السجل هو مصدر الحقيقة لإكمال التشغيل عبر `resume()`.
+
 ## خريطة الطريق المقترحة
 
 1. قدرات جديدة: `process.execute` (مقيّد)، `network.fetch` (للقراءة فقط)، `vector.store`.

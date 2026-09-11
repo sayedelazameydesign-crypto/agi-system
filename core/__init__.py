@@ -8,9 +8,28 @@ Philosophy: **no claims without evidence.**  A run only reaches ``VERIFIED``
 after the verifier independently re-checks the world.
 """
 
+from .clock import DEFAULT_CLOCK, Clock, FrozenClock, SystemClock
+from .config import DEFAULT_CONFIG_FILENAME, SCHEMA_VERSION, Limits, RetryPolicy, Settings
+from .errors import (
+    AbortedError,
+    CapabilityDeniedError,
+    ConfigurationError,
+    ExecutionTimeoutError,
+    KernelError,
+    LedgerCorruptionError,
+    LedgerError,
+    PlanningError,
+    PolicyViolation,
+    QuotaExceededError,
+    RunTimeoutError,
+    SandboxViolationError,
+    VerificationError,
+)
 from .event_ledger import EventLedger, LedgerState
 from .executor import Executor
 from .kernel import Kernel, KernelConfig
+from .logging_setup import configure_logging
+from .metrics import MetricsRecorder
 from .models import (
     Action,
     DecisionRecord,
@@ -21,13 +40,14 @@ from .models import (
     Plan,
     PolicyDecision,
 )
-from .planner import Planner, PlanningError, SequentialPlanner
+from .planner import Planner, SequentialPlanner
 from .policy import PolicyConfig, PolicyEngine
 from .verifier import Verifier
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 __all__ = [
+    # kernel
     "Kernel",
     "KernelConfig",
     "Planner",
@@ -40,6 +60,7 @@ __all__ = [
     "Verifier",
     "EventLedger",
     "LedgerState",
+    # models
     "Goal",
     "Action",
     "Plan",
@@ -47,5 +68,29 @@ __all__ = [
     "Evidence",
     "ExecStatus",
     "DecisionRecord",
+    # operations (phase 0)
+    "Settings",
+    "Limits",
+    "RetryPolicy",
+    "MetricsRecorder",
+    "configure_logging",
+    "Clock",
+    "SystemClock",
+    "FrozenClock",
+    "DEFAULT_CLOCK",
+    "SCHEMA_VERSION",
+    "DEFAULT_CONFIG_FILENAME",
+    "KernelError",
+    "ConfigurationError",
+    "PolicyViolation",
+    "CapabilityDeniedError",
+    "SandboxViolationError",
+    "VerificationError",
+    "ExecutionTimeoutError",
+    "RunTimeoutError",
+    "QuotaExceededError",
+    "LedgerError",
+    "LedgerCorruptionError",
+    "AbortedError",
     "__version__",
 ]

@@ -11,11 +11,8 @@ import os
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Optional
 
+from .errors import MissingParameterError, PlanningError, UnsupportedGoalError
 from .models import Action, Goal, Plan
-
-
-class PlanningError(Exception):
-    """Raised when a goal cannot be turned into any plan."""
 
 
 class Planner(ABC):
@@ -52,9 +49,10 @@ class SequentialPlanner(Planner):
     def propose(self, goal: Goal) -> List[Plan]:
         builder = self._builders.get(goal.goal_type)
         if builder is None:
-            raise PlanningError(
+            raise UnsupportedGoalError(
                 f"unsupported goal_type={goal.goal_type!r}; "
-                f"supported={self.supported_goal_types}"
+                f"supported={self.supported_goal_types}",
+                goal_type=goal.goal_type,
             )
         candidates = builder(goal)[: self.max_alternatives]
         if not candidates:
@@ -148,8 +146,10 @@ class SequentialPlanner(Planner):
     @staticmethod
     def _require(goal: Goal, key: str) -> Any:
         if key not in goal.params:
-            raise PlanningError(
-                f"goal_type={goal.goal_type!r} requires param {key!r}"
+            raise MissingParameterError(
+                f"goal_type={goal.goal_type!r} requires param {key!r}",
+                goal_type=goal.goal_type,
+                param=key,
             )
         return goal.params[key]
 

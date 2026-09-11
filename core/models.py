@@ -56,6 +56,7 @@ class ExecStatus(str, Enum):
     DENIED = "DENIED"
     FAILED = "FAILED"
     INCONCLUSIVE = "INCONCLUSIVE"
+    ABORTED = "ABORTED"
 
     @property
     def is_terminal(self) -> bool:
@@ -64,6 +65,7 @@ class ExecStatus(str, Enum):
             ExecStatus.DENIED,
             ExecStatus.FAILED,
             ExecStatus.INCONCLUSIVE,
+            ExecStatus.ABORTED,
         )
 
     def __str__(self) -> str:  # nicer f-strings / logging
@@ -250,6 +252,7 @@ class DecisionRecord:
     evidence: List[Evidence] = field(default_factory=list)
     denial_reasons: List[str] = field(default_factory=list)
     error: Optional[str] = None
+    error_code: Optional[str] = None
     started_at: float = field(default_factory=utc_now)
     finished_at: Optional[float] = None
 
@@ -283,6 +286,7 @@ class DecisionRecord:
             evidence=[Evidence.from_dict(e) for e in data.get("evidence", [])],
             denial_reasons=list(data.get("denial_reasons", [])),
             error=data.get("error"),
+            error_code=data.get("error_code"),
             started_at=float(data.get("started_at") or utc_now()),
             finished_at=data.get("finished_at"),
         )

@@ -42,7 +42,7 @@ from core import (  # noqa: E402
 class LyingExecutor(Executor):
     """Claims success without touching the filesystem."""
 
-    def execute(self, action):  # type: ignore[override]
+    def execute(self, action, timeout=None):  # type: ignore[override]
         return Observation(
             capability=action.capability,
             action_id=action.action_id,
@@ -66,7 +66,7 @@ class TamperingExecutor(Executor):
 class ExplodingExecutor(Executor):
     """Raises instead of returning an Observation."""
 
-    def execute(self, action):  # type: ignore[override]
+    def execute(self, action, timeout=None):  # type: ignore[override]
         raise RuntimeError("boom")
 
 
@@ -78,11 +78,11 @@ class CrashingExecutor(Executor):
         self.calls = 0
         self.fail_on = fail_on
 
-    def execute(self, action):  # type: ignore[override]
+    def execute(self, action, timeout=None):  # type: ignore[override]
         self.calls += 1
         if self.calls == self.fail_on:
             raise KeyboardInterrupt("simulated crash")
-        return super().execute(action)
+        return super().execute(action, timeout=timeout)
 
 
 # --------------------------------------------------------------------------- #
