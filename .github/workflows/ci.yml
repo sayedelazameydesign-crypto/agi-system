@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Show environment
+        run: |
+          python -V
+          python -c "import sys; print(sys.platform)"
+
+      - name: Unit tests
+        run: python -m unittest discover -s tests -t . -v
+
+      - name: Demo smoke test
+        run: python demo.py
+
+      - name: CLI smoke test
+        run: |
+          python -m core doctor --sandbox .ci-sandbox --json
+          python -m core run --sandbox .ci-sandbox --goal-type create_file \
+            --param path=ci.txt --param content=ci --json
+          python -m core verify --sandbox .ci-sandbox --json
+          python -m core replay --sandbox .ci-sandbox --json
+
+      - name: Compile check
+        run: python -m compileall -q core demo.py tests

@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agi-kernel"
+version = "0.3.0"
+description = "Dependency-free AGI kernel: a verified cognitive loop with an append-only event ledger"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "sayedelazameydesign-crypto" }]
+keywords = ["agi", "agent", "kernel", "verification", "event-sourcing", "sandbox"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = []
+
+[project.scripts]
+agi-kernel = "core.cli:main"
+
+[tool.setuptools]
+packages = ["core"]
+
+[tool.setuptools.package-data]
+core = ["py.typed"]
