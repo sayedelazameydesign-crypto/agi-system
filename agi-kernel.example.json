@@ -1,0 +1,32 @@
+{
+  "sandbox_dir": "./sandbox",
+  "ledger_path": null,
+  "metrics_path": null,
+  "log_path": null,
+  "log_level": "INFO",
+  "log_json": false,
+  "allowlist": [
+    "filesystem.read",
+    "filesystem.write",
+    "filesystem.mkdir",
+    "filesystem.list",
+    "filesystem.delete"
+  ],
+  "denylist": [],
+  "max_risk": 0.85,
+  "allow_delete": true,
+  "limits": {
+    "action_timeout_seconds": 10.0,
+    "run_timeout_seconds": 120.0,
+    "max_actions_per_plan": 32,
+    "max_content_bytes": 8388608,
+    "max_sandbox_files": 5000
+  },
+  "retry": {
+    "max_attempts": 1,
+    "backoff_seconds": 0.05,
+    "retry_on_timeout": false
+  },
+  "metrics_enabled": true,
+  "schema_version": "1.0"
+}

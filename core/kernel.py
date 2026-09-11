@@ -156,6 +156,7 @@ class Kernel:
     ) -> DecisionRecord:
         """Execute one full cognitive cycle for *goal*."""
         record = DecisionRecord(goal=goal, run_id=run_id or new_id("run"))
+        record.started_at = self.clock.now()
         with self._lock:
             self._runs[record.run_id] = record
 
@@ -326,6 +327,8 @@ class Kernel:
                     error=observation.error or "execution failed",
                     code=observation.data.get("error_code") or "EXECUTION_FAILED",
                 )
+            # the run budget is enforced between *and after* every step
+            self._check_deadline(deadline)
 
         if not self.config.verify:
             return self._finalize(record, ExecStatus.VERIFIED)
@@ -544,7 +547,7 @@ class Kernel:
             record.error = error
         if code is not None:
             record.error_code = code
-        record.finished_at = _now()
+        record.finished_at = self.clock.now()
         payload: Dict[str, Any] = {"record": record.to_dict(), "status": status.value}
         if error is not None:
             payload["error"] = error

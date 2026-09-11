@@ -18,12 +18,32 @@ Goal → Planner → Policy → Executor → Verifier → Evidence → DecisionR
 git clone https://github.com/sayedelazameydesign-crypto/agi-system.git
 cd agi-system
 
-python3 demo.py                      # عرض تجريبي كامل (6 سيناريوهات)
-python3 -m unittest discover -s tests -t . -v   # 39 اختبار وحدة
-python3 demo.py --sandbox ./sb --keep           # الاحتفاظ ببيئة الاختبار لفحصها
+python3 demo.py                                 # عرض تجريبي كامل (6 سيناريوهات)
+python3 -m unittest discover -s tests -t . -v   # 86 اختبار وحدة
+python3 -m core doctor --sandbox ./sandbox      # فحص صحة النظام
 ```
 
-لا يحتاج المشروع إلى بناء أو تثبيت: `python3` هو كل المطلوب.
+لا يحتاج المشروع إلى بناء أو تثبيت: `python3` هو كل المطلوب (صفر اعتمادات).
+
+**واجهة الأوامر** (`agi-kernel` أو `python -m core`):
+
+```bash
+python3 -m core run --sandbox ./sandbox \
+    --goal-type create_file --param path=a.txt --param content=hi --json
+
+python3 -m core replay --json        # إعادة بناء الحالة من السجل
+python3 -m core resume run_abc123    # إكمال تشغيل انقطع
+python3 -m core verify --quarantine  # فحص السجل وعزل الذيل التالف
+python3 -m core doctor --json        # تقرير صحة شامل
+python3 -m core metrics --json       # عدّادات وزمن التنفيذ
+python3 -m core rotate --keep 5      # أرشفة السجل وبدء سلسلة جديدة
+```
+
+رموز الخروج: `0` موثّق · `1` فشل · `2` إعدادات · `3` مرفوض سياسيًا ·
+`4` غير موثّق · `5` تلف السجل · `6` إيقاف.
+
+التثبيت الاختياري كحزمة (بلا أي تبعيات وقت التشغيل):
+`python3 -m pip install -e .` ثم `agi-kernel doctor`.
 
 ---
 
@@ -63,7 +83,16 @@ core/
 ├── event_ledger.py    ← سجل JSONL (append-only + سلسلة هاش + قفل + replay)
 └── kernel.py          ← المحور: الحلقة الكاملة + state management + resume + توازٍ
 demo.py                ← 6 سيناريوهات توضيحية (سعيد، اختراق مسار، منفذ كاذب، ...)
-tests/                 ← 39 اختبار وحدة، محمولة بالكامل (tempfile — تعمل على Windows)
+core/cli.py            ← واجهة سطر الأوامر (run/replay/resume/verify/doctor/metrics/rotate)
+core/config.py         ← Settings (ملف JSON/TOML + متغيرات AGI_*) مع تحقّق
+core/errors.py         ← تصنيف أخطاء بأكواد ثابتة
+core/clock.py          ← ساعة قابلة للحقن (SystemClock / FrozenClock)
+core/metrics.py        ← عدّادات ومقاييس بلا اعتمادات
+core/logging_setup.py  ← تسجيل structured (نص أو JSON)
+tests/                 ← 86 اختبار وحدة، محمولة بالكامل (tempfile — تعمل على Windows)
+docs/ARCHITECTURE.md   ← البنية، الثوابت، نقاط التمديد
+docs/OPERATIONS.md     ← دليل التشغيل والاستعادة ورموز الخروج
+.github/workflows/ci.yml ← اختبارات على Python 3.10 → 3.13 بلا أي حزمة خارجية
 ```
 
 ---
@@ -119,7 +148,7 @@ PROPOSED → AUTHORIZED → EXECUTING → VERIFIED      (الدليل كامل �
 
 ---
 
-## المرحلة 0: التثبيت (Hardening) — الحالة: مكتملة جزئيًا ✓
+## المرحلة 0: التثبيت (Hardening) — الحالة: مكتملة ✓
 
 الهدف: **نظام أكثر قوة وقابلية للتشغيل** — بدون ذكاء جديد، فقط جاهزية تشغيل حقيقية.
 
@@ -138,8 +167,10 @@ PROPOSED → AUTHORIZED → EXECUTING → VERIFIED      (الدليل كامل �
 | `fsck` / `quarantine` / `snapshot` / `rotate` للسجل | `core/event_ledger.py` | ✓ |
 | إصدار مخطط الأحداث (`schema_version`) | `core/config.py` | ✓ |
 | فحص صحة شامل `Kernel.health()` | `core/kernel.py` | ✓ |
-| واجهة سطر أوامر (`agi-kernel`) | `core/cli.py` | ⏳ قيد التنفيذ |
-| حزمة قابلة للتثبيت + CI | `pyproject.toml`, `.github/` | ⏳ قيد التنفيذ |
+| اختبارات التثبيت (86 اختبارًا إجمالًا) | `tests/test_phase0_hardening.py` | ✓ |
+| وثائق البنية والتشغيل | `docs/ARCHITECTURE.md`, `docs/OPERATIONS.md` | ✓ |
+| واجهة سطر أوامر (`agi-kernel`) | `core/cli.py` | ✓ |
+| حزمة قابلة للتثبيت + CI | `pyproject.toml`, `.github/workflows/ci.yml` | ✓ |
 
 > ملاحظة معمارية: المنفذ **لا** يبتلع `KeyboardInterrupt`/`SystemExit` — فهي تعود للعملية،
 > ويبقى السجل هو مصدر الحقيقة لإكمال التشغيل عبر `resume()`.
